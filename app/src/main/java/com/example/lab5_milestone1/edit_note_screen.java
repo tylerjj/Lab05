@@ -56,7 +56,7 @@ public class edit_note_screen extends AppCompatActivity {
             dbHelper.saveNotes(username, title, content, date);
         } else {
             title = "NOTE_" + (noteid + 1);
-            dbHelper.updateNoteNotes(title, date, content, username);
+            dbHelper.updateNote(title, date, content, username);
         }
 
         Intent intent = new Intent(this, home_screen.class);
