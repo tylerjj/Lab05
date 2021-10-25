@@ -5,14 +5,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 public class home_screen extends AppCompatActivity {
 
+    public static ArrayList<Note> notes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,9 +32,36 @@ public class home_screen extends AppCompatActivity {
         TextView welcome = (TextView) findViewById(R.id.titleWelcome);
         SharedPreferences sharedPreferences = getSharedPreferences("com.example.lab5_milestone1", Context.MODE_PRIVATE);
 
-        welcome.setText("Welcome "+sharedPreferences.getString("username",""));
+        String username = sharedPreferences.getString("username", "");
+        welcome.setText("Welcome "+username);
+
+        notes = readNotes(username);
+        ArrayList<String> displayNotes = new ArrayList<>();
+        for (Note note: notes){
+            displayNotes.add(String.format("Title:%s\nDate:%s", note.getTitle(), note.getDate()));
+        }
+
+        ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, displayNotes);
+        ListView listView = (ListView) findViewById(R.id.listNotes);
+        listView.setAdapter(adapter);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+                Log.i("onItemClick", "Position: "+position);
+                Intent intent = new Intent(getApplicationContext(), edit_note_screen.class);
+                intent.putExtra("noteid", position);
+                startActivity(intent);
+            }
+        });
     }
 
+    private ArrayList<Note> readNotes(String username) {
+        Context context = getApplicationContext();
+        SQLiteDatabase sqLiteDatabase = context.openOrCreateDatabase("notes", Context.MODE_PRIVATE, null);
+        DBHelper dbHelper = new DBHelper(sqLiteDatabase);
+        return dbHelper.readNotes(username);
+    }
     //https://developer.android.com/guide/topics/ui/menus#java
     /*
     To specify the options menu for an activity, override
@@ -73,10 +110,16 @@ public class home_screen extends AppCompatActivity {
     }
 
     private void addNote() {
+        goToEditNoteScreen();
     }
 
     public void goToLoginScreen() {
         Intent intent = new Intent(this, login_screen.class);
+        startActivity(intent);
+    }
+
+    public void goToEditNoteScreen(){
+        Intent intent = new Intent(this, edit_note_screen.class);
         startActivity(intent);
     }
 }

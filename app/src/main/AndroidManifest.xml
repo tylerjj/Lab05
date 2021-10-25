@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Lab5_Milestone1">
         <activity
+            android:name=".edit_note_screen"
+            android:exported="false" />
+        <activity
             android:name=".home_screen"
             android:exported="false" />
         <activity
